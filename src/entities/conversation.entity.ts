@@ -6,6 +6,8 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { User } from "./user.entity";
 import { Message } from "./message.entity";
@@ -38,10 +40,10 @@ export class Conversation {
   @Column({ default: 4096 })
   maxTokens: number;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column({ default: 0 })
