@@ -15,6 +15,7 @@ import { JwtAuthGuard } from "./jwt-auth.guard";
 import { RefreshUserTokensDto } from "../dto/refreshUserTokens.dto";
 import { CreateUserDto } from "../dto/CreateUser.dto";
 import { loginUserDto } from "../dto/loginUser.dto";
+import { TempApiTokensService } from "./temp-api-tokens.service";
 
 interface AuthenticatedRequest {
   user: {
@@ -27,7 +28,10 @@ interface AuthenticatedRequest {
 
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly tempApiTokenService: TempApiTokensService
+  ) {}
 
   /**
    * Root endpoint for API health check
@@ -115,5 +119,11 @@ export class AuthController {
         role: req.user.role,
       },
     };
+  }
+
+  @Get("auth/AssemblyTTS")
+  @UseGuards(JwtAuthGuard)
+  async getAssemblyTTSToken() {
+    return await this.tempApiTokenService.getAssemblyAIAuthTokens()
   }
 }
