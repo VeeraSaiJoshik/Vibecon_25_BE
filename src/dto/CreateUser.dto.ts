@@ -17,7 +17,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: "Password is required" })
   @IsStrongPassword(
     {
-      minLength: 12,
+      minLength: 6,
       minLowercase: 1,
       minUppercase: 1,
       minNumbers: 1,
@@ -25,14 +25,16 @@ export class CreateUserDto {
     },
     {
       message:
-        "Password must be 12 characters, 1 lowercase, 1 uppercase, 1 number, and 1 symbol",
+        "Password must be 6 characters, 1 lowercase, 1 uppercase, 1 number, and 1 symbol",
     },
   )
   password: string;
 
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value.toLowerCase() as string)
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === "string" ? value.toLowerCase() : value,
+  )
   @Matches(/^(admin|user)$/, {
     message: "Role must be either 'admin' or 'user'",
   })
