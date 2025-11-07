@@ -3,8 +3,7 @@ import { Conversation } from "./conversation.entity";
 
 @Entity()
 export class Message {
-  @PrimaryGeneratedColumn()
-  @Generated("uuid")
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
