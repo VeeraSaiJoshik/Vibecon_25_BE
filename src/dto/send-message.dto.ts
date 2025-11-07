@@ -6,6 +6,7 @@ import {
   IsNumber,
   Min,
   Max,
+  MaxLength,
 } from "class-validator";
 
 export class SendMessageDto {
@@ -23,6 +24,7 @@ export class SendMessageDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(10000)
   systemPrompt?: string;
 
   @IsOptional()

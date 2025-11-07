@@ -2,9 +2,9 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  Generated,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
 } from "typeorm";
 import { Conversation } from "./conversation.entity";
 
@@ -26,7 +26,7 @@ export class Message {
   @Column({ type: "text" })
   content: string;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
   @Column({ default: 0 })
