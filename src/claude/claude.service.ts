@@ -227,6 +227,8 @@ export class ClaudeService {
       if (sendMessageDto.maxTokens) {
         conversation.maxTokens = sendMessageDto.maxTokens;
       }
+      // Persist updated settings before making API call
+      await this.conversationRepository.save(conversation);
     } else {
       // Create new conversation
       conversation = await this.createConversation(userId, {
