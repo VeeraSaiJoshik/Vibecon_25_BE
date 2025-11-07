@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // You can ignore these, eslint has a seizure when it sees good code
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
