@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { JwtModule as NestJwtModule } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtService } from "./jwt.service";
+import type { StringValue } from "ms";
 
 @Module({
   imports: [
@@ -34,8 +35,8 @@ import { JwtService } from "./jwt.service";
         return {
           secret,
           signOptions: {
-            algorithm: "HS256",
-            expiresIn: accessExp,
+            algorithm: "HS256" as const,
+            expiresIn: accessExp as StringValue,
           },
         };
       },

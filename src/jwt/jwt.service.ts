@@ -5,6 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { JwtService as NestJwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
+import type { StringValue } from "ms";
 
 export interface JwtPayload {
   sub: string; // userId
@@ -21,18 +22,18 @@ export class JwtService {
   // ----- ACCESS TOKEN -----
   generateAccessToken(payload: JwtPayload): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>("JWT_SECRET"), // Use symmetric secret
-      algorithm: "HS256", // Switch to HS256
-      expiresIn: this.configService.get<string>("JWT_ACCESS_EXP", "15m"),
+      secret: this.configService.get<string>("JWT_SECRET") ?? "default-secret",
+      algorithm: "HS256" as const,
+      expiresIn: (this.configService.get<string>("JWT_ACCESS_EXP") ?? "15m") as StringValue,
     });
   }
 
   // ----- REFRESH TOKEN -----
   generateRefreshToken(payload: JwtPayload): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>("JWT_SECRET"), // Use symmetric secret
-      algorithm: "HS256", // Switch to HS256
-      expiresIn: this.configService.get<string>("JWT_REFRESH_EXP", "7d"),
+      secret: this.configService.get<string>("JWT_SECRET") ?? "default-secret",
+      algorithm: "HS256" as const,
+      expiresIn: (this.configService.get<string>("JWT_REFRESH_EXP") ?? "7d") as StringValue,
     });
   }
 
