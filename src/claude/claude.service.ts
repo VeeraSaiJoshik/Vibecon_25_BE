@@ -286,7 +286,6 @@ export class ClaudeService {
 
     // Update conversation token usage
     conversation.totalTokensUsed += inputTokens + outputTokens;
-    conversation.updatedAt = new Date();
     await this.conversationRepository.save(conversation);
   }
 
