@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, Generated, ManyToOne, JoinColumn } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
 import { Conversation } from "./conversation.entity";
 
 @Entity()
