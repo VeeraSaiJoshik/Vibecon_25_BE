@@ -172,18 +172,57 @@ export class ClaudeService {
       content: msg.content,
     }));
 
-    // Call Claude API
-    const response = await this.anthropic.messages.create({
-      model: conversation.model,
-      max_tokens: conversation.maxTokens,
-      temperature: conversation.temperature,
-      system: conversation.systemPrompt,
-      messages: apiMessages,
-    });
+    let response: Anthropic.Messages.Message;
+    try {
+      // Call Claude API
+      response = await this.anthropic.messages.create({
+        model: conversation.model,
+        max_tokens: conversation.maxTokens,
+        temperature: conversation.temperature,
+        system: conversation.systemPrompt,
+        messages: apiMessages,
+      });
+    } catch (error: unknown) {
+      // Handle Anthropic API errors with specific context
+      const err = error as { status?: number; code?: string; message?: string };
+      if (err?.status === 401) {
+        throw new Error(
+          "Authentication failed with Anthropic API. Please check your API key configuration.",
+        );
+      } else if (err?.status === 429) {
+        throw new Error(
+          "Rate limit exceeded for Anthropic API. Please try again later or upgrade your plan.",
+        );
+      } else if (err?.status === 400) {
+        throw new Error(
+          `Invalid request to Anthropic API: ${err?.message || "Bad request"}. Check model name, parameters, or message format.`,
+        );
+      } else if (err?.status === 404) {
+        throw new Error(
+          `Model '${conversation.model}' not found. Please check the model name or your API access level.`,
+        );
+      } else if (err?.status && err.status >= 500) {
+        throw new Error(
+          `Anthropic API server error (${err.status}). The service may be temporarily unavailable.`,
+        );
+      } else if (err?.code === "ENOTFOUND" || err?.code === "ECONNREFUSED") {
+        throw new Error(
+          "Network error: Unable to connect to Anthropic API. Please check your internet connection.",
+        );
+      } else if (err?.code === "ETIMEDOUT") {
+        throw new Error(
+          "Request to Anthropic API timed out. Please try again or check your network connection.",
+        );
+      } else {
+        throw new Error(
+          `Failed to get response from Anthropic API: ${err?.message || "Unknown error"}`,
+        );
+      }
+    }
 
     // Extract text content from response
     const assistantContent = response.content
-      .filter((block) => block.type === "text")
+      .filter((block): block is Anthropic.Messages.TextBlock => block.type === "text")
       .map((block) => block.text)
       .join("");
 
@@ -256,32 +295,70 @@ export class ClaudeService {
       content: msg.content,
     }));
 
-    // Call Claude API with streaming
-    const stream = await this.anthropic.messages.create({
-      model: conversation.model,
-      max_tokens: conversation.maxTokens,
-      temperature: conversation.temperature,
-      system: conversation.systemPrompt,
-      messages: apiMessages,
-      stream: true,
-    });
-
     let fullResponse = "";
     let inputTokens = 0;
     let outputTokens = 0;
 
-    // Stream the response
-    for await (const event of stream) {
-      if (event.type === "content_block_delta") {
-        if (event.delta.type === "text_delta") {
-          const text = event.delta.text;
-          fullResponse += text;
-          yield text;
+    try {
+      // Call Claude API with streaming
+      const stream = await this.anthropic.messages.create({
+        model: conversation.model,
+        max_tokens: conversation.maxTokens,
+        temperature: conversation.temperature,
+        system: conversation.systemPrompt,
+        messages: apiMessages,
+        stream: true,
+      });
+
+      // Stream the response
+      for await (const event of stream) {
+        if (event.type === "content_block_delta") {
+          if (event.delta.type === "text_delta") {
+            const text = event.delta.text;
+            fullResponse += text;
+            yield text;
+          }
+        } else if (event.type === "message_start") {
+          inputTokens = event.message.usage.input_tokens;
+        } else if (event.type === "message_delta") {
+          outputTokens = event.usage.output_tokens;
         }
-      } else if (event.type === "message_start") {
-        inputTokens = event.message.usage.input_tokens;
-      } else if (event.type === "message_delta") {
-        outputTokens = event.usage.output_tokens;
+      }
+    } catch (error: unknown) {
+      // Handle Anthropic API errors with specific context
+      const err = error as { status?: number; code?: string; message?: string };
+      if (err?.status === 401) {
+        throw new Error(
+          "Authentication failed with Anthropic API. Please check your API key configuration.",
+        );
+      } else if (err?.status === 429) {
+        throw new Error(
+          "Rate limit exceeded for Anthropic API. Please try again later or upgrade your plan.",
+        );
+      } else if (err?.status === 400) {
+        throw new Error(
+          `Invalid request to Anthropic API: ${err?.message || "Bad request"}. Check model name, parameters, or message format.`,
+        );
+      } else if (err?.status === 404) {
+        throw new Error(
+          `Model '${conversation.model}' not found. Please check the model name or your API access level.`,
+        );
+      } else if (err?.status && err.status >= 500) {
+        throw new Error(
+          `Anthropic API server error (${err.status}). The service may be temporarily unavailable.`,
+        );
+      } else if (err?.code === "ENOTFOUND" || err?.code === "ECONNREFUSED") {
+        throw new Error(
+          "Network error: Unable to connect to Anthropic API. Please check your internet connection.",
+        );
+      } else if (err?.code === "ETIMEDOUT") {
+        throw new Error(
+          "Request to Anthropic API timed out. Please try again or check your network connection.",
+        );
+      } else {
+        throw new Error(
+          `Failed to stream message from Anthropic API: ${err?.message || "Unknown error"}`,
+        );
       }
     }
 
