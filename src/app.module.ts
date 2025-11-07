@@ -3,9 +3,12 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "./users/users.module";
 import { User } from "./entities/user.entity";
+import { Conversation } from "./entities/conversation.entity";
+import { Message } from "./entities/message.entity";
 import { AuthModule } from "./auth/auth.module";
 import { JwtModule } from "./jwt/jwt.module";
 import { DbModule } from "./db/db.module";
+import { ClaudeModule } from "./claude/claude.module";
 import { ConfigModule } from "@nestjs/config";
 
 /** DO NOT DELETE
@@ -19,12 +22,15 @@ import { ConfigModule } from "@nestjs/config";
     TypeOrmModule.forRoot({
       type: "sqlite",
       database: "../database.db", // Use repo root database for compatibility
-      entities: [User],
+      entities: [User, Conversation, Message],
       synchronize: true,
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      // Allow dynamic resolution: prefer process.env already injected by Docker, fallback to file
+
+      // Environment variable resolution strategy:
+      // If NODE_ENV is set, load the corresponding .env file (e.g., .env.production).
+      // Otherwise, fall back to the default .env file.
       envFilePath: [
         process.env.NODE_ENV ? `./src/.env.${process.env.NODE_ENV}` : "",
         "./src/.env",
@@ -34,6 +40,7 @@ import { ConfigModule } from "@nestjs/config";
     AuthModule,
     JwtModule,
     DbModule,
+    ClaudeModule,
   ],
 })
 export class AppModule {}
