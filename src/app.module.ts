@@ -28,6 +28,9 @@ import { ConfigModule } from "@nestjs/config";
     ConfigModule.forRoot({
       isGlobal: true,
 
+      // Environment variable resolution strategy:
+      // If NODE_ENV is set, load the corresponding .env file (e.g., .env.production).
+      // Otherwise, fall back to the default .env file.
       envFilePath: [
         process.env.NODE_ENV ? `./src/.env.${process.env.NODE_ENV}` : "",
         "./src/.env",
