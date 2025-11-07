@@ -1,6 +1,5 @@
 /* Ignore these errors bc of Import type infering */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { Module, forwardRef } from "@nestjs/common";
 import { UsersController } from "./users.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
