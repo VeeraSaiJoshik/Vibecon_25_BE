@@ -49,7 +49,12 @@ export class RateLimitGuard implements CanActivate {
       return true;
     }
 
-    if (userLimit.count >= this.maxRequests) {
+    // Increment atomically to prevent race conditions
+    userLimit.count++;
+
+    if (userLimit.count > this.maxRequests) {
+      // Decrement back since request is rejected
+      userLimit.count--;
       const retryAfter = Math.ceil((userLimit.resetTime - now) / 1000);
       throw new HttpException(
         {
@@ -61,7 +66,6 @@ export class RateLimitGuard implements CanActivate {
       );
     }
 
-    userLimit.count++;
     return true;
   }
 
